@@ -1,0 +1,31 @@
+[
+  {
+    "id": "C1",
+    "ts": "2026-09-24T08:55:00.000Z",
+    "service": "orders",
+    "from_version": "2.2.4",
+    "to_version": "2.3.0",
+    "summary": "Print-ready shipping labels (ASCII fast path for legacy label printer)",
+    "files": [
+      "brightcart/orders/address.py",
+      "brightcart/orders/labels.py"
+    ],
+    "flags": {
+      "LABEL_ASCII_FASTPATH": true
+    },
+    "commit": "c1deadbeef"
+  },
+  {
+    "id": "C2",
+    "ts": "2026-09-24T09:03:00.000Z",
+    "service": "payments",
+    "from_version": "1.8.1",
+    "to_version": "1.8.2",
+    "summary": "Increase retry jitter from 50 ms to 120 ms",
+    "files": [
+      "brightcart/payments/retry.py"
+    ],
+    "flags": {},
+    "commit": "c2cafebabe"
+  }
+]

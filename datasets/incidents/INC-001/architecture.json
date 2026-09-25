@@ -1,0 +1,27 @@
+{
+  "services": [
+    {
+      "name": "gateway",
+      "depends_on": [
+        "orders"
+      ],
+      "user_facing": true
+    },
+    {
+      "name": "orders",
+      "depends_on": [
+        "payments",
+        "orders-db"
+      ]
+    },
+    {
+      "name": "payments",
+      "depends_on": []
+    },
+    {
+      "name": "orders-db",
+      "kind": "datastore",
+      "depends_on": []
+    }
+  ]
+}

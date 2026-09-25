@@ -1,0 +1,11 @@
+{
+  "incident_id": "INC-001",
+  "title": "Checkout failures after the DACH campaign launch",
+  "alert_at": "2026-09-24T09:12:00.000Z",
+  "window": {
+    "start": "2026-09-24T08:40:00.000Z",
+    "end": "2026-09-24T09:40:00.000Z"
+  },
+  "incident_commit": "5d33cc931778d1c6d36c04508014caacbf881c8c",
+  "seed": 7
+}
