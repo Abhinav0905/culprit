@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(write_file|apply_diff|search_and_replace|insert_content)$",
+        "hooks": [{ "type": "command", "command": ".venv/bin/python -m culprit.guard", "timeout": 10 }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": ".venv/bin/python -m culprit status --active", "timeout": 20 }]
+      }
+    ]
+  }
+}

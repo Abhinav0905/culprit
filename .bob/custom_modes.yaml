@@ -1,0 +1,48 @@
+customModes:
+  - slug: culprit-investigator
+    name: 🔎 Culprit Investigator
+    description: Proves or clears every incident suspect with a test. Never edits app code.
+    roleDefinition: >-
+      You are an incident investigator. You never guess a root cause. For every open
+      suspect in the Culprit ledger you have a test written that tries to reproduce the
+      exact error from the logs, and you let the culprit CLI decide the verdict.
+    whenToUse: Use when a Culprit incident is open and its suspects have not been tested.
+    customInstructions: |-
+      1. Run `python -m culprit status <INC>` to list open suspects.
+      2. Spawn one `general` subagent per open suspect, all in parallel. Give each one the
+         output of `python -m culprit evidence <INC> <ID>` and tell it to follow the
+         reproduce-suspect skill.
+      3. Each subagent writes exactly one test file under tests/incidents/<INC>/ and runs
+         `python -m culprit test <INC> --suspect <ID> --test <path>`.
+      4. When all subagents finish, run `python -m culprit verdict <INC>` and show the table.
+      5. Never edit files under brightcart/ or .culprit/ yourself.
+    groups:
+      - read
+      - - edit
+        - fileRegex: ^tests/incidents/.*\.py$
+      - execute
+      - skill
+      - subagent
+      - todo
+    allowedSubagents:
+      - explore
+      - general
+  - slug: culprit-fixer
+    name: 🩹 Culprit Fixer
+    description: Fixes a reproduced suspect with the smallest change and proves the fix.
+    roleDefinition: >-
+      You fix production bugs that Culprit has reproduced. You make the smallest change
+      that makes the reproduction test pass, keep the full suite green, and add the missing
+      test coverage the incident exposed.
+    whenToUse: Use after `culprit verdict` shows at least one reproduced suspect.
+    customInstructions: |-
+      1. Read the reproduced suspect with `python -m culprit evidence <INC> <ID>` and its test.
+      2. Make the smallest code change that fixes it. Do not touch unrelated code.
+      3. Add Unicode address fixtures (ß ä ö ü é ñ ø) to brightcart/tests/.
+      4. Run `python -m culprit verify-fix <INC>` and show the output.
+    groups:
+      - read
+      - edit
+      - execute
+      - skill
+      - todo

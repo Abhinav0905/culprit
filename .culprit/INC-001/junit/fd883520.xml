@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.019" timestamp="2026-09-25T12:10:04.425830-07:00" hostname="AiDash-mac-7P4C35"><testcase classname="culprit.tests.fixtures.test_unicode_fail" name="test_unicode_label_line" time="0.001"><failure message="UnicodeEncodeError: 'ascii' codec can't encode character '\xdf' in position 5: ordinal not in range(128)">def test_unicode_label_line():
+        """Reproducing the bug: label line must contain the street name unchanged."""
+        flags.set_flag("LABEL_ASCII_FASTPATH", True)
+        addr = NormalizedAddress(street="Schloßstraße 4", city="Wien", postal_code="1010", country="AT")
+        # With LABEL_ASCII_FASTPATH on this raises UnicodeEncodeError.
+        # After the fix it should return a label containing the street name.
+&gt;       result = to_label_line(addr)
+                 ^^^^^^^^^^^^^^^^^^^
+
+culprit/tests/fixtures/test_unicode_fail.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+addr = NormalizedAddress(street='Schloßstraße 4', city='Wien', postal_code='1010', country='AT')
+
+    def to_label_line(addr: NormalizedAddress) -&gt; str:
+        """Build label line: 'STREET, POSTAL CITY, COUNTRY'.
+    
+        When LABEL_ASCII_FASTPATH is on (orders v2.3.0), the result is
+        ASCII-encoded for a legacy label printer.  Any non-ASCII character
+        raises UnicodeEncodeError.
+        """
+        line = f"{addr.street}, {addr.postal_code} {addr.city}, {addr.country}"
+        if flags.is_enabled("LABEL_ASCII_FASTPATH"):
+&gt;           line = line.encode("ascii").decode("ascii")
+                   ^^^^^^^^^^^^^^^^^^^^
+E           UnicodeEncodeError: 'ascii' codec can't encode character '\xdf' in position 5: ordinal not in range(128)
+
+brightcart/orders/address.py:35: UnicodeEncodeError</failure></testcase></testsuite></testsuites>
