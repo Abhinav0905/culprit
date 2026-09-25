@@ -1,0 +1,114 @@
+{
+  "id": "INC-001",
+  "title": "Checkout failures after the DACH campaign launch",
+  "window": {
+    "start": "2026-09-24T08:40:00.000Z",
+    "end": "2026-09-24T09:40:00.000Z"
+  },
+  "alert_at": "2026-09-24T09:12:00.000Z",
+  "origin_service": "orders",
+  "affected_services": [
+    "orders",
+    "gateway"
+  ],
+  "first_error_at": "2026-09-24T09:06:16.514Z",
+  "error_rate_peak_pct": 17.24,
+  "failed_checkouts": 81,
+  "signatures": [
+    {
+      "id": "SIG1",
+      "service": "orders",
+      "exc_type": "UnicodeEncodeError",
+      "exc_message_norm": "<q> codec can<q><ch>' in position <n>: ordinal not in range(<n>)",
+      "top_frame": {
+        "module": "brightcart.orders.address",
+        "function": "to_label_line",
+        "line": 44
+      },
+      "count": 81,
+      "first_seen": "2026-09-24T09:06:16.514000Z",
+      "example_event_ids": [
+        "E02495",
+        "E02497",
+        "E02505"
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "ts": "2026-09-24T08:55:00.000Z",
+      "label": "C1: Print-ready shipping labels (ASCII fast path for legacy label printer)",
+      "kind": "change",
+      "evidence_ids": [
+        "E01427"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:03:00.000Z",
+      "label": "C2: Increase retry jitter from 50 ms to 120 ms",
+      "kind": "change",
+      "evidence_ids": [
+        "E02180"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:04:30.000Z",
+      "label": "First latency_high WARN (payments)",
+      "kind": "warn",
+      "evidence_ids": [
+        "E02329"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:06:00.000Z",
+      "label": "country_share_dach_pct jumped 0.0 \u2192 0.3",
+      "kind": "metric_shift",
+      "evidence_ids": [
+        "E02470"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:06:16.514Z",
+      "label": "First ERROR in orders (order_failed)",
+      "kind": "error",
+      "evidence_ids": [
+        "E02495"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:06:16.541Z",
+      "label": "First ERROR in gateway (checkout_failed)",
+      "kind": "error",
+      "evidence_ids": [
+        "E02496"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:09:00.000Z",
+      "label": "error_rate_pct jumped 3.6 \u2192 17.2",
+      "kind": "metric_shift",
+      "evidence_ids": [
+        "E02748"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:10:15.000Z",
+      "label": "First db_pool_high WARN (orders)",
+      "kind": "warn",
+      "evidence_ids": [
+        "E02859"
+      ]
+    },
+    {
+      "ts": "2026-09-24T09:12:00.000Z",
+      "label": "Alert fired",
+      "kind": "alert",
+      "evidence_ids": []
+    }
+  ],
+  "missing_evidence": [
+    "No distributed traces \u2014 gateway-to-orders linkage comes from `upstream` and `trace_id` only.",
+    "No label-printer logs.",
+    "No payments error logs in the window."
+  ]
+}

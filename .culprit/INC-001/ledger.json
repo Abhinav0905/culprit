@@ -1,0 +1,69 @@
+{
+  "incident_id": "INC-001",
+  "primary_signature_id": "SIG1",
+  "suspects": [
+    {
+      "id": "S1",
+      "kind": "change",
+      "title": "payments 1.8.2 deploy (C2), 3 minutes before the first error, p95 latency rose after it",
+      "service": "payments",
+      "module": null,
+      "function": null,
+      "change_id": "C2",
+      "prior": 0.65,
+      "rationale": "C2: Increase retry jitter from 50 ms to 120 ms (1.8.1 → 1.8.2, 3 min before first error)",
+      "evidence_ids": [
+        "E02180",
+        "E02495",
+        "E02497",
+        "E02505"
+      ],
+      "status": "suspect",
+      "verdict_reason": null,
+      "test_ids": []
+    },
+    {
+      "id": "S2",
+      "kind": "code",
+      "title": "`brightcart.orders.address.to_label_line` raises UnicodeEncodeError on some inputs, introduced by C1 (orders 2.3.0)",
+      "service": "orders",
+      "module": "brightcart.orders.address",
+      "function": "to_label_line",
+      "change_id": "C1",
+      "prior": 0.6,
+      "rationale": "brightcart.orders.address.to_label_line raises UnicodeEncodeError (81 times in the window), introduced by C1 (orders 2.3.0).",
+      "evidence_ids": [
+        "E02495",
+        "E02497",
+        "E02505",
+        "E01427"
+      ],
+      "status": "suspect",
+      "verdict_reason": null,
+      "test_ids": []
+    },
+    {
+      "id": "S3",
+      "kind": "resource",
+      "title": "orders DB pool saturation (started after the first error, may be a consequence)",
+      "service": "orders",
+      "module": "brightcart.orders.db",
+      "function": null,
+      "change_id": null,
+      "prior": 0.25,
+      "rationale": "Saturation warnings from brightcart.orders.db started after the first error and may be a consequence.",
+      "evidence_ids": [
+        "E02859",
+        "E02957",
+        "E03052",
+        "E03146",
+        "E03239"
+      ],
+      "status": "suspect",
+      "verdict_reason": null,
+      "test_ids": []
+    }
+  ],
+  "tests": [],
+  "history": []
+}
