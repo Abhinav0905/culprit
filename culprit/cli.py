@@ -229,8 +229,67 @@ def pytest_collection_modifyitems(items, config):
 
 def cmd_test(args: argparse.Namespace) -> int:
     incident_id = _require_incident(args)
-    from culprit.runner import run_test
-    return run_test(incident_id, args.suspect, args.test)
+    test_path = args.test
+
+    # Validate path must be under tests/incidents/<INC>/
+    expected_prefix = str(Path("tests/incidents") / incident_id)
+    if not test_path.startswith(expected_prefix):
+        print(f"ERROR: test path must be under tests/incidents/{incident_id}/", file=sys.stderr)
+        sys.exit(3)
+
+    # Validate docstring
+    from culprit.runner import parse_docstring
+    doc = parse_docstring(test_path)
+    if "suspect" not in doc or "mechanism" not in doc:
+        print(f"ERROR: {test_path} must have module docstring with 'suspect:' and 'mechanism:'", file=sys.stderr)
+        sys.exit(3)
+
+    # Validate suspect status
+    ledger = _load_ledger(incident_id)
+    suspect = next((s for s in ledger.suspects if s.id == args.suspect), None)
+    if not suspect:
+        print(f"ERROR: suspect {args.suspect} not found.", file=sys.stderr)
+        sys.exit(3)
+    if suspect.status not in ("suspect", "inconclusive"):
+        print(f"ERROR: suspect {args.suspect} has status {suspect.status}, must be suspect or inconclusive.", file=sys.stderr)
+        sys.exit(3)
+
+    # Load primary signature
+    from culprit.reconstruct import load_incident
+    from culprit.signature import normalize
+    incident = load_incident(incident_id)
+    primary_sig = next(
+        (s for s in incident["signatures"] if s["id"] == ledger.primary_signature_id), None
+    )
+    if not primary_sig:
+        print("ERROR: primary signature not found.", file=sys.stderr)
+        sys.exit(3)
+
+    from culprit.runner import run_test as _run_test
+    tr = _run_test(
+        incident_id=incident_id,
+        suspect_id=args.suspect,
+        test_path=test_path,
+        primary_sig_exc_type=primary_sig["exc_type"],
+        primary_sig_exc_message_norm=primary_sig["exc_message_norm"],
+        primary_sig_top_frame_module=primary_sig.get("top_frame", {}).get("module") if primary_sig.get("top_frame") else None,
+        primary_sig_top_frame_function=primary_sig.get("top_frame", {}).get("function") if primary_sig.get("top_frame") else None,
+    )
+
+    # Append to ledger
+    ledger = ledger.model_copy(update={"tests": ledger.tests + [tr]})
+    # Add test_id to suspect
+    idx = next(i for i, s in enumerate(ledger.suspects) if s.id == args.suspect)
+    updated_suspect = ledger.suspects[idx].model_copy(update={"test_ids": ledger.suspects[idx].test_ids + [tr.id]})
+    suspects = list(ledger.suspects)
+    suspects[idx] = updated_suspect
+    ledger = ledger.model_copy(update={"suspects": suspects})
+    _save_ledger(incident_id, ledger)
+
+    # Print summary line
+    would_be = "would be reproduced" if tr.score >= 0.80 else ("would be cleared" if tr.score < 0.30 else "inconclusive")
+    print(f"{tr.id}  {args.suspect}  {tr.outcome}  {tr.observed_exc_type or 'none'}  score={tr.score:.2f}  -> {would_be}")
+    return 0
 
 
 def cmd_verdict(args: argparse.Namespace) -> int:

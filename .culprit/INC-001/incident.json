@@ -8,8 +8,8 @@
   "alert_at": "2026-09-24T09:12:00.000Z",
   "origin_service": "orders",
   "affected_services": [
-    "orders",
-    "gateway"
+    "gateway",
+    "orders"
   ],
   "first_error_at": "2026-09-24T09:06:16.514Z",
   "error_rate_peak_pct": 17.24,

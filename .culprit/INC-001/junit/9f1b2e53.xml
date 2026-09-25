@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.057" timestamp="2026-09-25T11:56:44.884154-07:00" hostname="AiDash-mac-7P4C35"><testcase classname="culprit.tests.fixtures.test_other_error" name="test_pool_exhaustion_raises_different_error" time="0.051" /></testsuite></testsuites>

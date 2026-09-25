@@ -20,3 +20,4 @@ dependencies = [
 [tool.pytest.ini_options]
 testpaths = ["brightcart/tests", "culprit/tests", "tests/incidents"]
 norecursedirs = ["culprit/tests/fixtures"]
+addopts = "-p no:cacheprovider"

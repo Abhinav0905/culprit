@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.067" timestamp="2026-09-25T12:03:50.382270-07:00" hostname="AiDash-mac-7P4C35"><testcase classname="culprit.tests.fixtures.test_other_error" name="test_pool_exhaustion" time="0.051"><failure message="brightcart.orders.db.PoolTimeoutError: pool timeout after 0.05s: size=20 in_use=20">def test_pool_exhaustion():
+        """Pool must not time out under normal load — asserts pool can be acquired."""
+        db.reset()
+        db.set_in_use(20)  # pool full → raises PoolTimeoutError
+        # This call will raise PoolTimeoutError, which is NOT the incident error
+&gt;       conn = db.acquire(timeout_s=0.05)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+culprit/tests/fixtures/test_other_error.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+timeout_s = 0.05
+
+    def acquire(timeout_s: float = 2.0) -&gt; Connection:
+        """Acquire a connection from the pool, blocking up to timeout_s."""
+        global _in_use
+        deadline = time.monotonic() + timeout_s
+        while True:
+            with _lock:
+                if _in_use &lt; POOL_SIZE:
+                    _in_use += 1
+                    pct = _in_use / POOL_SIZE * 100
+                    if pct &gt; 90:
+                        _log.warn(
+                            "db_pool_high",
+                            f"DB pool usage high: {pct:.0f}%",
+                            pool_size=POOL_SIZE,
+                            in_use=_in_use,
+                            usage_pct=round(pct, 1),
+                        )
+                    return Connection()
+            if time.monotonic() &gt;= deadline:
+&gt;               raise PoolTimeoutError(
+                    f"pool timeout after {timeout_s}s: size={POOL_SIZE} in_use={_in_use}"
+                )
+E               brightcart.orders.db.PoolTimeoutError: pool timeout after 0.05s: size=20 in_use=20
+
+brightcart/orders/db.py:44: PoolTimeoutError</failure></testcase></testsuite></testsuites>

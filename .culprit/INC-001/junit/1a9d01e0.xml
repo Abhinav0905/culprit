@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.006" timestamp="2026-09-25T12:03:50.197148-07:00" hostname="AiDash-mac-7P4C35"><testcase classname="culprit.tests.fixtures.test_pass" name="test_payments_always_passes" time="0.000" /></testsuite></testsuites>
